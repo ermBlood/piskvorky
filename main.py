@@ -4,8 +4,8 @@ import pygame
 import logic
 
 # board size
-SIZE_X = 10
-SIZE_Y = 7
+SIZE_X = 20
+SIZE_Y = 20
 WIN_LEN = 5
 BOARD = logic.new_board(SIZE_X, SIZE_Y)
 
@@ -57,6 +57,13 @@ def draw_xo():
                 draw_o(col, cell_y)
 
 
+def draw_win_highland(coordinates):
+    for x,y in coordinates:
+        pygame.draw.rect(screen, "green", ((x*CELL+LINE_W, y*CELL+LINE_W), (CELL-LINE_W, CELL-LINE_W)))
+    draw_xo()
+    pygame.display.flip()
+
+
 def switch_player(player):
     return "O" if player == "X" else "X"
 
@@ -66,6 +73,7 @@ def mouse_to_cell(pos):
 
 
 def run():
+    game_over = False
     player = "X"
     draw_grid()
     pygame.display.flip()
@@ -76,7 +84,7 @@ def run():
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and game_over == False:
                 cell_x, cell_y = mouse_to_cell(event.pos)
                 if logic.is_valid_move(BOARD, cell_x, cell_y):
 
@@ -86,10 +94,12 @@ def run():
                     draw_xo()
                     pygame.display.flip()
 
-                    if logic.is_win(BOARD, cell_x, cell_y, player, WIN_LEN):
+                    is_win = logic.is_win(BOARD, cell_x, cell_y, player, WIN_LEN)
+                    if is_win[0]:
                         print(f"Vyhrál {player}")
-                        break
-                    
+                        draw_win_highland(is_win[1])
+                        game_over = True
+                                            
                     player = switch_player(player)
 
 
