@@ -2,66 +2,15 @@
 import sys
 import pygame
 import logic
-
-# board size
-SIZE_X = 20
-SIZE_Y = 20
-WIN_LEN = 5
-BOARD = logic.new_board(SIZE_X, SIZE_Y)
-
-# visual
-CELL = 25
-LINE_W = 2
-MARK_W = 8
-PANEL_H = 90
-PAD = 18
-
-# colors
-CELL_COLOR = (65, 112, 129)
-GRID_COLOR = (90, 157, 182)
-X_COLOR = (200, 60, 60)
-O_COLOR = (240, 240, 240)
+import render
+import settings
 
 
+BOARD = logic.new_board(settings.SIZE_X, settings.SIZE_Y)
 pygame.init()
-screen = pygame.display.set_mode((SIZE_X*CELL+LINE_W, SIZE_Y*CELL+LINE_W))
+screen = pygame.display.set_mode((settings.SIZE_X*settings.CELL+settings.LINE_W, settings.SIZE_Y*settings.CELL+settings.LINE_W))
 
 
-def draw_grid():
-    screen.fill(CELL_COLOR)
-
-    for y in range(SIZE_Y+1):
-        pygame.draw.line(screen, GRID_COLOR,(0, y*CELL), (SIZE_X*CELL, y*CELL), LINE_W)    
-    for x in range(SIZE_X+1):
-        pygame.draw.line(screen, GRID_COLOR,(x*CELL, 0), (x*CELL, SIZE_Y*CELL), LINE_W)
-
-
-def draw_x(x, y):
-    pygame.draw.line(screen, X_COLOR, (x*CELL, y*CELL), (x*CELL+CELL, y*CELL+CELL), width=MARK_W)
-    pygame.draw.line(screen, X_COLOR, (x*CELL+CELL, y*CELL), (x*CELL, y*CELL+CELL), width=MARK_W)
-
-
-def draw_o(x, y):
-    pygame.draw.circle(screen, O_COLOR, (x*CELL+CELL/2, y*CELL+CELL/2), CELL/2, width=MARK_W//2)
-       
-
-def draw_xo():
-    cell_y = -1
-
-    for row in BOARD:
-        cell_y += 1
-        for col in range(len(row)):
-            if row[col] == "X":
-                draw_x(col, cell_y)
-            elif row[col] == "O":
-                draw_o(col, cell_y)
-
-
-def draw_win_highland(coordinates):
-    for x,y in coordinates:
-        pygame.draw.rect(screen, "green", ((x*CELL+LINE_W, y*CELL+LINE_W), (CELL-LINE_W, CELL-LINE_W)))
-    draw_xo()
-    pygame.display.flip()
 
 
 def switch_player(player):
@@ -69,13 +18,13 @@ def switch_player(player):
 
 
 def mouse_to_cell(pos):
-    return pos[0]//CELL, pos[1]//CELL
+    return pos[0]//settings.CELL, pos[1]//settings.CELL
 
 
 def run():
     game_over = False
     player = "X"
-    draw_grid()
+    render.draw_grid(screen)
     pygame.display.flip()
 
     while True:
@@ -90,14 +39,15 @@ def run():
 
                     logic.apply_move(BOARD, cell_x, cell_y, player)
 
-                    draw_grid()
-                    draw_xo()
+                    render.draw_grid(screen)
+                    render.draw_xo(BOARD, screen)
                     pygame.display.flip()
 
-                    is_win = logic.is_win(BOARD, cell_x, cell_y, player, WIN_LEN)
+                    is_win = logic.is_win(BOARD, cell_x, cell_y, player, settings.WIN_LEN)
                     if is_win[0]:
                         print(f"Vyhrál {player}")
-                        draw_win_highland(is_win[1])
+                        render.draw_win_highland(BOARD, screen, is_win[1])
+                        pygame.display.flip()
                         game_over = True
                                             
                     player = switch_player(player)
