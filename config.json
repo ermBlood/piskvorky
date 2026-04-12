@@ -1,0 +1,24 @@
+{
+  "res": [800, 800],
+  "win_len": 5,
+  "cell": 50,
+  "line_w": 2,
+  "mark_w": 4,
+  "panel_h": 35,
+
+  "grid_color": "#fca500",
+  "cell_color": "#ffd401",
+  "x_color": "#5e2b94",
+  "o_color": "#01a147",
+  "cursor_color": "#f7630d",
+  "win_highland_color": "#fca500",
+  "menu_bg_color": [255, 255, 255, 130],
+  "button_color": "#3f3598",
+
+  "board_layouts": {
+  "mini": 3,
+  "small": 10,
+  "medium": 20,
+  "large": 30
+  }
+}

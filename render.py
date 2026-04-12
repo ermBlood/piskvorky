@@ -1,25 +1,68 @@
 #render.py
 
 import pygame
-import settings
+import pygame.gfxdraw
 
 pygame.font.init()
-font = pygame.font.SysFont("Great Vibes", 30)
+font = pygame.font.SysFont("Noto Sans", 30)
 
 
-def draw_grid(screen):
-    screen.fill(settings.GRID_COLOR)
+def draw_grid(config, screen, board_size):
+    screen.fill(config.cell_color)
+    cells_in_row = config.get_scale_size_value()
 
-    for x in range(settings.SIZE_Y):
-        for y in range(settings.SIZE_X):
-            pygame.draw.rect(screen, settings.CELL_COLOR, (settings.CELL*y, settings.CELL*x, settings.CELL, settings.CELL), width=settings.LINE_W//2)
+    for x in range(cells_in_row):
+        for y in range(cells_in_row):
+            pygame.draw.rect(screen, config.grid_color, (config.res[0]//cells_in_row*y, config.res[0]//cells_in_row*x, config.res[0]//cells_in_row, config.res[0]//cells_in_row), width=config.line_w//2)
 
 
-def draw_name_panel(panel_screen):
-    panel_screen.fill((35,35,35))
+def draw_menu(config, screen, buttons):
+    screen.fill(config.menu_bg_color)
+
+    button_n = 0
+    for button in buttons:
+        button.rect = draw_button(config, screen, button.text, button_n)
+        button_n += 1
+
+    
+def draw_button(config, screen, text, button_position):
+    button_rect = pygame.Rect(0, 0, screen.get_width()*.5, screen.get_height()*.08)
+    button_rect.centerx = screen.get_rect().centerx
+    button_rect.centery = screen.get_rect().centery+(button_position*100)
+    pygame.draw.rect(screen, config.button_color, button_rect)
+    
+    text_surface = font.render(f"{text}", True, "white")
+    text_rect = text_surface.get_rect()
+
+    text_rect.center = button_rect.center
+
+    if text == "Size":
+        text_rect.right = button_rect.centerx
+        value_surface = font.render(f": {config.get_scale_size_key()}", True, "white")
+        value_rect = value_surface.get_rect()
+        value_rect.center = button_rect.center
+        value_rect.left = button_rect.centerx
+        screen.blit(value_surface, value_rect)    
+
+    # elif text == "Scale":
+    #     text_rect.right = button_rect.centerx
+    #     value_surface = font.render(f": {config.get_scale_size_key()}", True, "white")
+    #     value_rect = value_surface.get_rect()
+    #     value_rect.center = button_rect.center
+    #     value_rect.left = button_rect.centerx
+    #     screen.blit(value_surface, value_rect)
+     
+    screen.blit(text_surface, text_rect)
+    return button_rect
+    
+
+def draw_name_panel(config):
+    font = pygame.font.SysFont("Great Vibes", 30)
+    config.panel_name_screen.fill((35,35,35))
     text_piskvorky = font.render("piškvorky", True, (225,225,225))
-    text_piskvorky_rect = text_piskvorky.get_rect(center=(settings.SIZE_X*(settings.CELL+settings.LINE_W)//2, settings.PANEL_H//2))
-    panel_screen.blit(text_piskvorky, text_piskvorky_rect)
+    text_piskvorky_rect = text_piskvorky.get_rect(center=(config.res[0]//2, config.panel_h//2))
+    config.panel_name_screen.blit(text_piskvorky, text_piskvorky_rect)
+    config.app_screen.blit(config.panel_name_screen, ((0, config.res[0])))
 
 
 def draw_text(surface, font, text, x, y, color):
@@ -27,39 +70,49 @@ def draw_text(surface, font, text, x, y, color):
     surface.blit(text_surf, (x, y))
 
 
-def draw_x(screen, x, y, cursor=False):
-    if cursor: color = settings.CURSOR_COLOR
-    else: color = settings.X_COLOR
+def draw_x(config, screen, x, y, is_like_cursor=False):
+    if is_like_cursor: color = config.cursor_color
+    else: color = config.x_color
+    cells_in_row = config.get_scale_size_value()
+    size_of_cell = config.res[0]//cells_in_row
 
-    temp_surface = pygame.Surface((settings.CELL, settings.CELL), pygame.SRCALPHA)    
-    pygame.draw.rect(temp_surface, color, (settings.CELL//2-settings.MARK_W//2, 0, settings.MARK_W, settings.CELL))
-    pygame.draw.rect(temp_surface, color, (0, settings.CELL//2-settings.MARK_W//2, settings.CELL, settings.MARK_W))
+    temp_surface = pygame.Surface((size_of_cell, size_of_cell), pygame.SRCALPHA)
+    pygame.draw.rect(temp_surface, color, (size_of_cell//2-config.mark_w/2, 0, config.mark_w, size_of_cell))  
+    pygame.draw.rect(temp_surface, color, (0, size_of_cell//2-config.mark_w/2, size_of_cell, config.mark_w))
     temp_surface = pygame.transform.rotate(temp_surface, 45)
 
-    offset = (temp_surface.get_width()-settings.CELL)//2
-    screen.blit(temp_surface, (x*settings.CELL-offset, y*settings.CELL-offset))
+    offset= (temp_surface.get_width()//2)
+    screen.blit(temp_surface, (x-offset, y-offset))
 
 
-def draw_o(screen, x, y, cursor=False):
-    if cursor: color = settings.CURSOR_COLOR
-    else: color = settings.O_COLOR
+def draw_o(config, screen, x, y, is_like_cursor=False):
+    if is_like_cursor: color = config.cursor_color
+    else: color = config.o_color
+    cells_in_row = config.get_scale_size_value()
 
-    pygame.draw.circle(screen, color, (x*settings.CELL+settings.CELL//2, y*settings.CELL+settings.CELL//2), settings.CELL//2*.75, width=settings.MARK_W)
+    pygame.draw.circle(screen, color, (x, y), config.res[0]//cells_in_row//2*.75, width=config.mark_w)
+    # pygame.gfxdraw.aacircle(screen, int(x), int(y), int(config.res[0]//cells_in_row//2*.75), (200, 200, 200))
+
+def draw_board_with_xo(config, board, screen):
+    cells_in_row = config.get_scale_size_value()
+    size_of_cell = config.res[0]//cells_in_row
+
+    row_n = 0
+    for row in board:
+        cell_n = 0
+        for cell in row:
+            if cell == "X":
+                draw_x(config, screen, cell_n*size_of_cell + size_of_cell*.5, row_n*size_of_cell + size_of_cell*.5)
+            elif cell == "O":
+                draw_o(config, screen, cell_n*size_of_cell + size_of_cell*.5, row_n*size_of_cell + size_of_cell*.5)
+            cell_n += 1
+        row_n += 1
 
 
-def draw_xo(BOARD, screen):
-    cell_y = -1
+def draw_win_highland(config, board, screen, winners_coordinates):
+    cells_in_row = config.get_scale_size_value()
+    size_of_cell = config.res[0]//cells_in_row
 
-    for row in BOARD:
-        cell_y += 1
-        for col in range(len(row)):
-            if row[col] == "X":
-                draw_x(screen, col, cell_y)
-            elif row[col] == "O":
-                draw_o(screen, col, cell_y)
-
-
-def draw_win_highland(BOARD, screen, coordinates):
-    for y,x in coordinates:
-        pygame.draw.rect(screen, settings.WIN_HIGHLAND_COLOR, (y*settings.CELL+settings.LINE_W//2, x*settings.CELL+settings.LINE_W//2, settings.CELL-settings.LINE_W, settings.CELL-settings.LINE_W))
-    draw_xo(BOARD, screen)
+    for y,x in winners_coordinates:
+        pygame.draw.rect(screen, config.win_highland_color, (y*size_of_cell+config.line_w//2, x*size_of_cell+config.line_w//2, size_of_cell-config.line_w, size_of_cell-config.line_w))
+    draw_board_with_xo(config, board, screen)

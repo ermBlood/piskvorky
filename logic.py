@@ -7,11 +7,11 @@ DIRECTIONS = [
     (1, -1),  # diagonal /
 ]
 
-def new_board(size_x: int, size_y: int):
+def new_board(board_scale: int):
     """Return empty size x size board."""
     board = []
-    for _ in range(size_y):
-        board.append(size_x * [""])
+    for _ in range(board_scale):
+        board.append(board_scale * [""])
 
     return board
 
@@ -63,4 +63,14 @@ def is_win(board: list[list[str]], x: int, y: int, player: str, win_len: int):
         if result[0] >= win_len:
             
             return True, result[1]
-    return False, None
+    return False, []
+
+
+def is_tie(board):
+    for row in board:
+        for i in row:
+            if i == "":
+
+                return False
+    return True
+    

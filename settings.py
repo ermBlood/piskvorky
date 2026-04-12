@@ -3,9 +3,9 @@
 # board size
 SIZE_X = 10
 SIZE_Y = 20
-WIN_LEN = 5
+WIN_LEN = 3
 
-# visual
+# scales
 CELL = 32
 LINE_W = 2
 MARK_W = 4
@@ -13,9 +13,11 @@ PANEL_H = 35
 PAD = 18
 
 # colors
-CELL_COLOR = (65, 112, 129)
-GRID_COLOR = (90, 157, 182)
-X_COLOR = ("blue")
-O_COLOR = ("red")
-WIN_HIGHLAND_COLOR = ("lightgreen")
-CURSOR_COLOR = ("white")
+CELL_COLOR = ("#ffd401")
+GRID_COLOR = ("#fca500")
+X_COLOR = ("#5e2b94")
+O_COLOR = ("#01a147")
+WIN_HIGHLAND_COLOR = ("#fca500")
+CURSOR_COLOR = ("#f7630d")
+BUTTON_COLOR = ("#3f3598")
+MENU_BG_COLOR = (255, 255, 255, 130)
