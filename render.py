@@ -1,5 +1,6 @@
 #render.py
 
+import enum
 import pygame
 import pygame.gfxdraw
 
@@ -19,16 +20,25 @@ def draw_grid(config, screen, board_size):
 def draw_menu(config, screen, buttons):
     screen.fill(config.menu_bg_color)
 
-    button_n = 0
-    for button in buttons:
-        button.rect = draw_button(config, screen, button.text, button_n)
-        button_n += 1
+    screen_height = config.res[1]
+    button_height = screen_height//10
+    gap = button_height//2
+    
+    # celková výška všech tlačítek dohromady
+    total_height = len(buttons) * button_height + (len(buttons) - 1) * gap
+
+    # kde začít (aby byl blok tlačítek vycentrovaný)
+    start_y = screen_height // 2 
+
+    for n, button in enumerate(buttons):
+        button.rect = draw_button(config, screen, button.text, button_height, start_y, gap, n)
 
     
-def draw_button(config, screen, text, button_position):
-    button_rect = pygame.Rect(0, 0, screen.get_width()*.5, screen.get_height()*.08)
+def draw_button(config, screen, text, button_height, start_y, gap, n):
+    button_rect = pygame.Rect(0, 0, screen.get_width()*.5, button_height)
+
     button_rect.centerx = screen.get_rect().centerx
-    button_rect.centery = screen.get_rect().centery+(button_position*100)
+    button_rect.centery = start_y + n * (button_height + gap)
     pygame.draw.rect(screen, config.button_color, button_rect)
     
     text_surface = font.render(f"{text}", True, "white")
