@@ -13,6 +13,7 @@ class Config:
         self.cell = data["cell"]
         self.panel_h = data["panel_h"]
         self.win_len = data["win_len"]
+        self.win_len_temp = self.win_len
         self.line_w = data["line_w"]
         self.mark_w = data["mark_w"]
         self.grid_color = data["grid_color"]
@@ -61,7 +62,8 @@ config = Config()
 
 
 class Button:
-    def __init__(self, text):
+    def __init__(self, name, text):
+        self.name = name
         self.text = text
         self.rect = None
 
@@ -72,14 +74,15 @@ class Button:
 
 
 menu_buttons = [
-    Button("Continue"),
-    Button("New game"),
-    Button("Settings"),
+    Button("continue", "Continue"),
+    Button("new_game", "New game"),
+    Button("settings", "Settings"),
 ]
 settings_buttons = [
-    Button("Return"),
-    Button("<< Layout size >>"),
-    Button("Save & New game")
+    Button("return", "Return"),
+    Button("layout_size", "Layout size"),
+    Button("win_len", "Win length"),
+    Button("save_and_new_game", "Save & New game")
 ]
 
 
@@ -94,7 +97,11 @@ def mouse_to_cell(pos):
 
 
 def new_game():
-    config.board = logic.new_board(config.get_scale_size_value())                                
+    config.board = logic.new_board(config.get_scale_size_value())    
+    config.win_len = max(config.win_len_temp, 3)   #keep above 2
+    config.win_len = min(config.win_len_temp, config.get_scale_size_value())    #keeps under max length
+    config.win_len_temp = config.win_len
+                              
     config.state = "game"
     config.game_over = False
     config.winners_coordinates = []
@@ -153,11 +160,11 @@ def run():
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     for button in menu_buttons:
                         if button.is_clicked(event.pos):
-                            if button.text == "Continue":
+                            if button.name == "continue":
                                 config.state = "game"
-                            elif button.text == "New game":
+                            elif button.name == "new_game":
                                 new_game()
-                            elif button.text == "Settings":
+                            elif button.name == "settings":
                                 config.state = "settings"
                 
             # NEW settings menu
@@ -169,20 +176,30 @@ def run():
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     for button in settings_buttons:
                         if button.is_clicked(event.pos):
-                            if button.text == "Return":
+                            if button.name == "return":
                                 config.board_selected_layout_temp = config.board_selected_layout
+                                config.win_len_temp = config.win_len
                                 config.state = "menu"
-                            elif button.text == "<< Layout size >>":
+                            
+                            elif button.name == "layout_size":
                                 if event.pos[0] < button.rect.centerx:
                                     config.board_selected_layout_temp -= 1
                                 else:
                                     config.board_selected_layout_temp += 1
                                 config.board_selected_layout_temp = max(config.board_selected_layout_temp, 0)   #keep above -1
                                 config.board_selected_layout_temp = min(config.board_selected_layout_temp, len(config.board_layouts_keys)-1)    #keeps under len(boards)
+                            
+                            elif button.name == "win_len":
+                                if event.pos[0] < button.rect.centerx:
+                                    config.win_len_temp -= 1
+                                else:
+                                    config.win_len_temp += 1
+                                config.win_len_temp = max(config.win_len_temp, 3)   #keep above 2
+                                config.win_len_temp = min(config.win_len_temp, config.get_scale_size_value())    #keeps under max length
                                 
-                                
-                            elif button.text == "Save & New game":
+                            elif button.name == "save_and_new_game":
                                 config.board_selected_layout = config.board_selected_layout_temp
+                                config.win_len = config.win_len_temp
                                 new_game()
       
                             

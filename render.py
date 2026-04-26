@@ -28,28 +28,46 @@ def draw_menu(config, screen, buttons):
     start_y = screen_height // 2 
 
     for n, button in enumerate(buttons):
-        button.rect = draw_button(config, screen, button.text, button_height, start_y, gap, n)
+        button.rect = draw_button(config, screen, button.text, button.name, button_height, start_y, gap, n)
 
     
-def draw_button(config, screen, text, button_height, start_y, gap, n):
-    button_rect = pygame.Rect(0, 0, screen.get_width()*.5, button_height)
-
-    button_rect.centerx = screen.get_rect().centerx
+def draw_button(config, screen, text, name, button_height, start_y, gap, n):
+    button_rect = pygame.Rect(0, 0, screen.get_width()*.5, button_height)   #----- create whole button
+    button_rect.centerx = screen.get_rect().centerx                         
     button_rect.centery = start_y + n * (button_height + gap)
-    pygame.draw.rect(screen, config.button_color, button_rect)
+    pygame.draw.rect(screen, config.button_color, button_rect)              #-----
     
-    text_surface = font.render(f"{text}", True, "white")
-    text_rect = text_surface.get_rect()
+    text_surface = font.render(f"{text}", True, "white")                    # create surface for base text
+    text_rect = text_surface.get_rect()                                     # create rect for surface base text
+    text_rect.center = button_rect.center                                   # move base text rect to base rect pos
 
-    text_rect.center = button_rect.center
+    # with values
+    if name in ("layout_size", "win_len"):
+        value = None
 
-    if text == "Size":
-        text_rect.right = button_rect.centerx
-        value_surface = font.render(f": {config.get_scale_size_key()}", True, "white")
-        value_rect = value_surface.get_rect()
-        value_rect.center = button_rect.center
+        if name == "layout_size": value = config.get_scale_size_key()
+        elif name == "win_len" : value = config.win_len_temp
+        
+        text_rect.right = button_rect.centerx                               
+        value_surface = font.render(f": {value}", True, "white")  # create surface for value
+        value_rect = value_surface.get_rect()                                           # create rect for surface value
+        value_rect.center = button_rect.center                                          # move value rect to button rect
         value_rect.left = button_rect.centerx
-        screen.blit(value_surface, value_rect)    
+        screen.blit(value_surface, value_rect)      # draw value surface on screen in position of value rect - (picture, pos)
+
+    # with arrows
+    if name in ("layout_size", "win_len"):
+        l_arrow_surface = font.render(" <", True, "white")   # create arrow text surface
+        r_arrow_surface = font.render("> ", True, "white")
+
+        l_arrow_rect = l_arrow_surface.get_rect()           # create rect from text surface
+        r_arrow_rect = r_arrow_surface.get_rect()
+
+        l_arrow_rect.midleft = button_rect.midleft          # move rect to button pos
+        r_arrow_rect.midright = button_rect.midright
+
+        screen.blit(l_arrow_surface, l_arrow_rect)
+        screen.blit(r_arrow_surface, r_arrow_rect)
     
     screen.blit(text_surface, text_rect)
     return button_rect
