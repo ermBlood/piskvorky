@@ -24,10 +24,16 @@ class Config:
         self.win_highland_color = data["win_highland_color"]
         self.menu_bg_color = data["menu_bg_color"]
         self.res = data["res"]
+        # STATE -----------
+        self.state = "menu"
+        self.game_over = False
+        self.player = "X"
+        self.winners_coordinates = []
         # BOARD -----------
         self.board_layouts = data["board_layouts"]
         self.board_layouts_keys = list(self.board_layouts.keys())
         self.board_selected_layout = 1
+        self.board_selected_layout_temp = self.board_selected_layout
         # SCREEN ----------
         self.app_screen = pygame.display.set_mode((self.res[0], self.res[1]+self.panel_h))
         self.game_screen = self.app_screen.subsurface(0, 0, self.res[0], self.res[1])
@@ -37,20 +43,18 @@ class Config:
         self.menu_bg_screen = pygame.Surface((self.res), pygame.SRCALPHA)
         # BOARD -----------
         self.board = logic.new_board(self.get_scale_size_value())
-        # STATE -----------
-        self.state = "menu"
-        self.game_over = False
-        self.player = "X"
-        self.winners_coordinates = []
 
 
     def get_scale_size_key(self):
-        key = self.board_layouts_keys[self.board_selected_layout]
-        return key
+        layout_n = self.board_selected_layout
+        if self.state == "settings":
+            layout_n = self.board_selected_layout_temp
+        key = self.board_layouts_keys[layout_n]
+        return key  #example: small
 
     def get_scale_size_value(self):
         value = self.board_layouts[self.get_scale_size_key()]
-        return value
+        return value    #example: 10    (actual value)
 
 
 config = Config()
@@ -90,7 +94,10 @@ def mouse_to_cell(pos):
 
 
 def new_game():
-    config.board = logic.new_board(config.get_scale_size_value())
+    config.board = logic.new_board(config.get_scale_size_value())                                
+    config.state = "game"
+    config.game_over = False
+    config.winners_coordinates = []
 
 
 def draw():
@@ -146,7 +153,38 @@ def run():
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     for button in menu_buttons:
                         if button.is_clicked(event.pos):
-                            print(button.text)
+                            if button.text == "Continue":
+                                config.state = "game"
+                            elif button.text == "New game":
+                                new_game()
+                            elif button.text == "Settings":
+                                config.state = "settings"
+                
+            # NEW settings menu
+            elif config.state == "settings":
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    config.board_selected_layout_temp = config.board_selected_layout
+                    config.state = "menu"
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    for button in settings_buttons:
+                        if button.is_clicked(event.pos):
+                            if button.text == "Return":
+                                config.board_selected_layout_temp = config.board_selected_layout
+                                config.state = "menu"
+                            elif button.text == "<< Layout size >>":
+                                print(config.board_selected_layout_temp)
+                                if event.pos[0] < button.rect.centerx:
+                                    config.board_selected_layout_temp -= 1
+                                else:
+                                    config.board_selected_layout_temp += 1
+                                
+                            elif button.text == "Save & New game":
+                                config.board_selected_layout = config.board_selected_layout_temp
+                                new_game()
+
+
+                                
 
 
 
