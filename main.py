@@ -173,70 +173,18 @@ def run():
                                 config.board_selected_layout_temp = config.board_selected_layout
                                 config.state = "menu"
                             elif button.text == "<< Layout size >>":
-                                print(config.board_selected_layout_temp)
                                 if event.pos[0] < button.rect.centerx:
                                     config.board_selected_layout_temp -= 1
                                 else:
                                     config.board_selected_layout_temp += 1
+                                config.board_selected_layout_temp = max(config.board_selected_layout_temp, 0)   #keep above -1
+                                config.board_selected_layout_temp = min(config.board_selected_layout_temp, len(config.board_layouts_keys)-1)    #keeps under len(boards)
+                                
                                 
                             elif button.text == "Save & New game":
                                 config.board_selected_layout = config.board_selected_layout_temp
                                 new_game()
-
-
-                                
-
-
-
-            # EVENT MENU -------------------------------------------------------------------------------
-            # if config.state == "menu":
-            #     if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            #         config.state = "game"
-
-            #     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            #         mx, my = event.pos
-            #         for button in menu_buttons:
-            #             if button.rect != None and button.rect.collidepoint(mx, my):
-
-            #                 if button.text == "Continue":
-            #                     config.state = "game"
-
-            #                 elif button.text == "New game":
-            #                     config.board = logic.new_board(config.get_scale_size_value())
-            #                     config.state = "game"
-            #                     config.game_over = False
-            #                     config.winners_coordinates = []
-
-            #                 elif button.text == "Settings":
-            #                     config.state = "settings"
-
-            # elif config.state == "settings":
-            #     if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            #         config.state = "menu"
-
-            #     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            #         mx, my = event.pos
-            #         for button in settings_buttons:
-            #             if button.rect != None and button.rect.collidepoint(mx, my):
-
-            #                 temp_board_selected_layout = config.board_selected_layout
-
-            #                 if button.text == "Return":
-            #                     config.board_selected_layout = 0
-            #                     config.state = "menu"
-
-            #                 elif button.text == "<< Layout size >>":
-            #                     if mx < button.rect.centerx:
-            #                         config.board_selected_layout -= 1
-
-            #                     else:
-            #                         config.board_selected_layout += 1
-
-            #                 elif button.text == "Save & New game":
-            #                     new_game()
-            #                     config.state = "game"
-
-                            
+      
                             
             # EVENT GAME -------------------------------------------------------------------------------
             elif config.state == "game":

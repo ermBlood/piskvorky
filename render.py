@@ -1,8 +1,5 @@
 #render.py
-
-import enum
 import pygame
-import pygame.gfxdraw
 
 pygame.font.init()
 font = pygame.font.SysFont("Noto Sans", 30)
@@ -53,15 +50,7 @@ def draw_button(config, screen, text, button_height, start_y, gap, n):
         value_rect.center = button_rect.center
         value_rect.left = button_rect.centerx
         screen.blit(value_surface, value_rect)    
-
-    # elif text == "Scale":
-    #     text_rect.right = button_rect.centerx
-    #     value_surface = font.render(f": {config.get_scale_size_key()}", True, "white")
-    #     value_rect = value_surface.get_rect()
-    #     value_rect.center = button_rect.center
-    #     value_rect.left = button_rect.centerx
-    #     screen.blit(value_surface, value_rect)
-     
+    
     screen.blit(text_surface, text_rect)
     return button_rect
     
