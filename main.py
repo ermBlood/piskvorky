@@ -12,8 +12,6 @@ class Config:
 
         self.cell = data["cell"]
         self.panel_h = data["panel_h"]
-        self.win_len = data["win_len"]
-        self.win_len_temp = self.win_len
         self.line_w = data["line_w"]
         self.mark_w = data["mark_w"]
         self.grid_color = data["grid_color"]
@@ -35,16 +33,15 @@ class Config:
         self.board_layouts_keys = list(self.board_layouts.keys())
         self.board_selected_layout = 1
         self.board_selected_layout_temp = self.board_selected_layout
+        self.board = logic.new_board(self.get_scale_size_value())
+        self.win_len = self.get_win_len()
+        self.win_len_temp = self.win_len
         # SCREEN ----------
         self.app_screen = pygame.display.set_mode((self.res[0], self.res[1]+self.panel_h))
         self.game_screen = self.app_screen.subsurface(0, 0, self.res[0], self.res[1])
         self.panel_name_screen = pygame.Surface((self.res[0], self.panel_h))
-
         self.menu_screen = pygame.Surface((self.game_screen.get_size()), pygame.SRCALPHA)
         self.menu_bg_screen = pygame.Surface((self.res), pygame.SRCALPHA)
-        # BOARD -----------
-        self.board = logic.new_board(self.get_scale_size_value())
-
 
     def get_scale_size_key(self):
         layout_n = self.board_selected_layout
@@ -54,9 +51,14 @@ class Config:
         return key  #example: small
 
     def get_scale_size_value(self):
-        value = self.board_layouts[self.get_scale_size_key()]
+        value_dict = self.board_layouts[self.get_scale_size_key()]
+        value = value_dict["size"]
         return value    #example: 10    (actual value)
 
+    def get_win_len(self):
+        value_dict = self.board_layouts[self.get_scale_size_key()]
+        value = value_dict["default_win_len"]
+        return value    #example: 5    (actual value)
 
 config = Config()
 
@@ -98,9 +100,6 @@ def mouse_to_cell(pos):
 
 def new_game():
     config.board = logic.new_board(config.get_scale_size_value())    
-    config.win_len = max(config.win_len_temp, 3)   #keep above 2
-    config.win_len = min(config.win_len_temp, config.get_scale_size_value())    #keeps under max length
-    config.win_len_temp = config.win_len
                               
     config.state = "game"
     config.game_over = False
@@ -152,7 +151,7 @@ def run():
                 pygame.quit()
                 sys.exit()
 
-            # NEW event menu
+            # EVENT menu
             if config.state == "menu":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     config.state = "game"
@@ -167,7 +166,7 @@ def run():
                             elif button.name == "settings":
                                 config.state = "settings"
                 
-            # NEW settings menu
+            # SETTINGS menu
             elif config.state == "settings":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     config.board_selected_layout_temp = config.board_selected_layout
@@ -178,7 +177,6 @@ def run():
                         if button.is_clicked(event.pos):
                             if button.name == "return":
                                 config.board_selected_layout_temp = config.board_selected_layout
-                                config.win_len_temp = config.win_len
                                 config.state = "menu"
                             
                             elif button.name == "layout_size":
@@ -189,12 +187,14 @@ def run():
                                 config.board_selected_layout_temp = max(config.board_selected_layout_temp, 0)   #keep above -1
                                 config.board_selected_layout_temp = min(config.board_selected_layout_temp, len(config.board_layouts_keys)-1)    #keeps under len(boards)
                             
+                                config.win_len_temp = config.get_win_len()
+
                             elif button.name == "win_len":
                                 if event.pos[0] < button.rect.centerx:
                                     config.win_len_temp -= 1
                                 else:
                                     config.win_len_temp += 1
-                                config.win_len_temp = max(config.win_len_temp, 3)   #keep above 2
+                                config.win_len_temp = max(config.win_len_temp, 3)   #keeps min value 3
                                 config.win_len_temp = min(config.win_len_temp, config.get_scale_size_value())    #keeps under max length
                                 
                             elif button.name == "save_and_new_game":
