@@ -67,7 +67,7 @@ class Button:
     def __init__(self, name, text):
         self.name = name
         self.text = text
-        self.rect = None
+        self.rect: pygame.Rect | None = None
 
     def is_clicked(self, clicked_pos):
         if self.rect:
@@ -180,7 +180,7 @@ def run():
                                 config.state = "menu"
                             
                             elif button.name == "layout_size":
-                                if event.pos[0] < button.rect.centerx:
+                                if button.rect and event.pos[0] < button.rect.centerx:  #if button.rect exist and click.pos < button.center
                                     config.board_selected_layout_temp -= 1
                                 else:
                                     config.board_selected_layout_temp += 1
@@ -190,7 +190,7 @@ def run():
                                 config.win_len_temp = config.get_win_len()
 
                             elif button.name == "win_len":
-                                if event.pos[0] < button.rect.centerx:
+                                if button.rect and event.pos[0] < button.rect.centerx:
                                     config.win_len_temp -= 1
                                 else:
                                     config.win_len_temp += 1
@@ -216,7 +216,8 @@ def run():
                         win, coordinates = logic.is_win(config.board, cell_x, cell_y, config.player, config.win_len)
                         if win:
                             config.game_over = True
-                            config.winners_coordinates = coordinates
+                            if coordinates != None:
+                                config.winners_coordinates = coordinates
                             print(f"Vyhrál {config.player}")
 
                         if logic.is_tie(config.board):
