@@ -82,9 +82,10 @@ def draw_name_panel(config):
     config.app_screen.blit(config.panel_name_screen, ((0, config.res[0])))
 
 
-def draw_text(surface, font, text, x, y, color):
-    text_surf = font.render(text, True, color)
-    surface.blit(text_surf, (x, y))
+def draw_text(surface, text, x, y, color, size=30):
+    font = pygame.font.SysFont("Noto Sans", size)
+    text_surface = font.render(text, True, color)
+    surface.blit(text_surface, (x-text_surface.get_width()//2, y-text_surface.get_height()//2))
 
 
 def draw_x(config, screen, x, y, is_like_cursor=False):

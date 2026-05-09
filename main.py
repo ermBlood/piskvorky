@@ -28,6 +28,7 @@ class Config:
         self.game_over = False
         self.player = "X"
         self.winners_coordinates = []
+        self.game_over_time = 0
         # BOARD -----------
         self.board_layouts = data["board_layouts"]
         self.board_layouts_keys = list(self.board_layouts.keys())
@@ -99,8 +100,7 @@ def mouse_to_cell(pos):
 
 
 def new_game():
-    config.board = logic.new_board(config.get_scale_size_value())    
-                              
+    config.board = logic.new_board(config.get_scale_size_value())
     config.state = "game"
     config.game_over = False
     config.winners_coordinates = []
@@ -137,7 +137,18 @@ def draw():
         else:
             render.draw_win_highland(config, config.board, config.game_screen, config.winners_coordinates)
             pygame.mouse.set_visible(True)
-            
+
+    elif config.state == "game_over":
+        pygame.mouse.set_visible(True)
+        render.draw_grid(config, config.game_screen, config.res)
+        render.draw_board_with_xo(config, config.board, config.game_screen)
+        render.draw_win_highland(config, config.board, config.game_screen, config.winners_coordinates)
+        if pygame.time.get_ticks() - config.game_over_time > 1000:
+            game_over_stat = f"WINNER is {config.player}"
+            if config.player == "":
+                game_over_stat = "DRAW"
+            render.draw_text(config.game_screen, game_over_stat, config.res[0]//2, config.res[1]//4, "red", 60)
+        
 
 def run():
     pygame.init()
@@ -219,12 +230,30 @@ def run():
                             if coordinates != None:
                                 config.winners_coordinates = coordinates
                             print(f"Vyhrál {config.player}")
+                            config.state = "game_over"
+                            config.game_over_time = pygame.time.get_ticks()
 
-                        if logic.is_tie(config.board):
+                        elif logic.is_tie(config.board):
                             config.game_over = True
+                            config.player = ""
                             print("Remíza")
-                                                
-                        config.player = switch_player(config.player)
+                            config.state = "game_over"
+                            config.game_over_time = pygame.time.get_ticks()
+                                               
+                        else: config.player = switch_player(config.player)
+
+            elif config.state == "game_over":
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    config.state = "menu"
+                elif pygame.time.get_ticks() - config.game_over_time > 1000:
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        config.state = "menu"
+                    
+
+
+
+
+
 
         draw()
 
